@@ -85,7 +85,6 @@ export default {
         }
       }).then(resp => {
         console.log('docs', resp.data);
-        this.Description = resp.data.Responses[0].Responses[0].FullTextAnnotation.Text;
       })
     },
     async handleUpload() {
