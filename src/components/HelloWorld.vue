@@ -71,6 +71,26 @@
       </v-col>
     </v-row>
   </v-container>
+  <v-dialog
+      v-model="dialog"
+      hide-overlay
+      persistent
+      width="300"
+    >
+      <v-card
+        color="primary"
+        dark
+      >
+        <v-card-text>
+          Loading...
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -83,11 +103,13 @@ export default {
       response: [],
       respPdf: [],
       Description: '',
-      previewImage: null
+      previewImage: null,
+      dialog: false
     }
   },
   methods: {
     async handleUploadDoc() {
+      this.dialog = true;
       var formData = new FormData();
       var imagefile = this.$refs.file1
       formData.append("doc", imagefile.files[0]);
@@ -107,9 +129,11 @@ export default {
           }
           this.respPdf.push(obj);
         });
-      })
+        this.dialog = false;
+      }).catch(err => {  console.error(err); this.dialog = false;})
     },
     async handleUpload() {
+      this.dialog = true;
       this.respPdf = [];
       var formData = new FormData();
       var imagefile = this.$refs.file1
@@ -123,7 +147,8 @@ export default {
           if (index == 0) this.Description = element.Description;
         });
         this.response = resp.data;
-      })
+        this.dialog = false;
+      }).catch(err => {  console.error(err); this.dialog = false;})
     }
   }
 }
