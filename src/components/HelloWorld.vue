@@ -1,58 +1,108 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <v-container>
+    <v-row class="text-center">
+      <v-col cols="12">
+        <v-img
+          :src="require('../assets/logo.svg')"
+          class="my-3"
+          contain
+          height="200"
+        />
+      </v-col>
+
+      <v-col class="mb-4" cols="12">
+        <h1 class="display-2 font-weight-bold mb-3">
+          CV Read Image/Document To Text
+        </h1>
+      </v-col>
+
+      <v-col
+        class="mb-5"
+        cols="12"
+      >
+        <v-row justify="center">
+          <v-file-input ref="file1"   placeholder="Upload image"
+            prepend-icon="mdi-camera"
+            label="Image"></v-file-input>
+        </v-row>
+        <v-row justify="center">
+          <v-col>
+            <v-btn @click="handleUpload">Upload Image</v-btn>
+          </v-col>
+         
+          <v-col>
+            <v-btn @click="handleUploadDoc" color="info">Upload Docs</v-btn>
+          </v-col>
+        
+        </v-row>
+      </v-col>
+      <v-col cols="12">
+        <v-card
+            elevation="5"
+            shaped
+          >
+            <v-card-title>
+              Result
+            </v-card-title>
+            <v-card-text v-html="Description">
+            </v-card-text>
+          </v-card>
+      </v-col>
+      <v-col cols="12">
+        <v-list>
+          <v-list-item v-for="item, index in response" :key="index">
+            <v-list-item-content>
+              {{ item }}
+            </v-list-item-content>
+            <v-divider></v-divider>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
+
+  data: () => {
+    return {
+      response: {},
+      Description: '',
+      previewImage: null
+    }
+  },
+  methods: {
+    async handleUploadDoc() {
+      var formData = new FormData();
+      var imagefile = this.$refs.file1
+      formData.append("doc", imagefile.files[0]);
+      await axios.post("https://localhost:44314/api/vision/document", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(resp => {
+        console.log('docs', resp.data);
+        this.Description = resp.data.Responses[0].Responses[0].FullTextAnnotation.Text;
+      })
+    },
+    async handleUpload() {
+      var formData = new FormData();
+      var imagefile = this.$refs.file1
+      formData.append("image", imagefile.files[0]);
+      await axios.post("https://localhost:44314/api/vision/image", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(resp => {
+        resp.data.forEach((element,index) => {
+          if (index == 0) this.Description = element.Description;
+        });
+        this.response = resp.data;
+      })
+    }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
