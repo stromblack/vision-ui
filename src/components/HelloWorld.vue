@@ -36,7 +36,7 @@
         
         </v-row>
       </v-col>
-      <v-col cols="12">
+      <v-col cols="12" v-if="respPdf.length == 0 && response.length > 0">
         <v-card
             elevation="5"
             shaped
@@ -48,7 +48,18 @@
             </v-card-text>
           </v-card>
       </v-col>
-      <v-col cols="12">
+      <v-col cols="12" v-if="respPdf.length > 0">
+        <v-list>
+          <v-list-item v-for="item, index in respPdf" :key="index">
+            <v-list-item-content>
+              <v-list-item-title>Page {{ item.context }}</v-list-item-title>
+              {{ item.text }}
+            </v-list-item-content>
+            <v-divider></v-divider>
+          </v-list-item>
+        </v-list>
+      </v-col>
+      <v-col cols="12" v-else>
         <v-list>
           <v-list-item v-for="item, index in response" :key="index">
             <v-list-item-content>
@@ -69,7 +80,8 @@ export default {
 
   data: () => {
     return {
-      response: {},
+      response: [],
+      respPdf: [],
       Description: '',
       previewImage: null
     }
@@ -84,10 +96,21 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(resp => {
-        console.log('docs', resp.data);
+        let data = resp.data.responses;
+        console.log('docs', data);
+        data.forEach(x => {
+          let context = x.context;
+          let text = x.fullTextAnnotation.text;
+          let obj = {
+            "context": context,
+            "text": text
+          }
+          this.respPdf.push(obj);
+        });
       })
     },
     async handleUpload() {
+      this.respPdf = [];
       var formData = new FormData();
       var imagefile = this.$refs.file1
       formData.append("image", imagefile.files[0]);
