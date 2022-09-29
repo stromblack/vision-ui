@@ -21,9 +21,9 @@
         cols="12"
       >
         <v-row justify="center">
-          <v-file-input ref="file1"   placeholder="Upload image"
+          <v-file-input ref="file1"   placeholder="Upload file"
             prepend-icon="mdi-camera"
-            label="Image"></v-file-input>
+            label="Image or Pdf file"></v-file-input>
         </v-row>
         <v-row justify="center">
           <v-col>
@@ -51,10 +51,10 @@
       <v-col cols="12" v-if="respPdf.length > 0">
         <v-list>
           <v-list-item v-for="item, index in respPdf" :key="index">
-            <v-list-item-content>
               <v-list-item-title>Page {{ item.context }}</v-list-item-title>
-              {{ item.text }}
-            </v-list-item-content>
+                <div class="pre-formatted">
+                  {{ item.text }}
+                </div>
             <v-divider></v-divider>
           </v-list-item>
         </v-list>
@@ -62,9 +62,9 @@
       <v-col cols="12" v-else>
         <v-list>
           <v-list-item v-for="item, index in response" :key="index">
-            <v-list-item-content>
-              {{ item }}
-            </v-list-item-content>
+            <div class="pre-formatted">
+                {{ item }}
+              </div>
             <v-divider></v-divider>
           </v-list-item>
         </v-list>
@@ -154,3 +154,7 @@ export default {
   }
 }
 </script>
+
+<style>
+  
+</style>
