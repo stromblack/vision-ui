@@ -109,6 +109,7 @@ export default {
   },
   methods: {
     async handleUploadDoc() {
+      this.respPdf = [];
       this.dialog = true;
       var formData = new FormData();
       var imagefile = this.$refs.file1
