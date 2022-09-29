@@ -52,9 +52,11 @@
         <v-list>
           <v-list-item v-for="item, index in respPdf" :key="index">
               <v-list-item-title>Page {{ item.context }}</v-list-item-title>
-                <div class="pre-formatted">
+              <v-card>
+                <v-card-text>
                   {{ item.text }}
-                </div>
+                </v-card-text>
+              </v-card>
             <v-divider></v-divider>
           </v-list-item>
         </v-list>
@@ -62,9 +64,11 @@
       <v-col cols="12" v-else>
         <v-list>
           <v-list-item v-for="item, index in response" :key="index">
-            <div class="pre-formatted">
+            <v-catd>
+              <v-card-text>
                 {{ item }}
-              </div>
+              </v-card-text>
+            </v-catd>
             <v-divider></v-divider>
           </v-list-item>
         </v-list>
