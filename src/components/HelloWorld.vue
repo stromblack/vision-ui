@@ -156,5 +156,7 @@ export default {
 </script>
 
 <style>
-  
+  .pre-formatted {
+    white-space: pre-wrap;
+  }
 </style>
