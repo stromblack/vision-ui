@@ -15,13 +15,17 @@
           CV Read Image/Document To Text
         </h1>
       </v-col>
-
+      <v-col cols="12" align-self="center" v-if="previewFile != ''">
+        <v-img ref="output" :src="previewFile" max-height="400" />
+      </v-col>
       <v-col
         class="mb-5"
         cols="12"
       >
         <v-row justify="center">
           <v-file-input ref="file1"   placeholder="Upload file"
+          @click:clear="previewFile = ''"
+          @change="handlePreviewFile"
             prepend-icon="mdi-camera"
             accept="image/*,.pdf, .tiff"
             label="Image or Pdf file"></v-file-input>
@@ -97,10 +101,22 @@ export default {
       respPdf: [],
       Description: '',
       previewImage: null,
-      dialog: false
+      dialog: false,
+      previewFile: ''
     }
   },
   methods: {
+    handlePreviewFile() {
+      this.previewFile = '';
+      var reader = new FileReader();
+      let self = this;
+      reader.onload = function(){
+        // var output = document.getElementById('output');
+        self.previewFile = reader.result;
+        // output.src = reader.result;
+      };
+      reader.readAsDataURL(this.$refs.file1.files[0]);
+    },
     async handleUploadDoc() {
       this.respPdf = [];
       this.dialog = true;
