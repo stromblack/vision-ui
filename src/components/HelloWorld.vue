@@ -23,6 +23,7 @@
         <v-row justify="center">
           <v-file-input ref="file1"   placeholder="Upload file"
             prepend-icon="mdi-camera"
+            accept="image/*,.pdf, .tiff"
             label="Image or Pdf file"></v-file-input>
         </v-row>
         <v-row justify="center">
@@ -57,18 +58,6 @@
                   {{ item.text }}
                 </v-card-text>
               </v-card>
-            <v-divider></v-divider>
-          </v-list-item>
-        </v-list>
-      </v-col>
-      <v-col cols="12" v-else>
-        <v-list>
-          <v-list-item v-for="item, index in response" :key="index">
-            <v-catd>
-              <v-card-text>
-                {{ item }}
-              </v-card-text>
-            </v-catd>
             <v-divider></v-divider>
           </v-list-item>
         </v-list>
@@ -148,6 +137,7 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(resp => {
+        console.log('--> resp', resp.data);
         resp.data.forEach((element,index) => {
           if (index == 0) this.Description = element.Description;
         });
