@@ -76,7 +76,30 @@
                   {{ item.text }}
                 </v-card-text>
               </v-card>
-            <v-divider></v-divider>
+              <v-expansion-panels>
+                <v-expansion-panel elevation="5">
+                <v-expansion-panel-title>Paragraphs of page {{ item.context.pageNumber }}</v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <v-table>
+                    <thead>
+                      <tr>
+                        <th>Paragraphs</th>
+                        <th>Word</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="row,rindex in pdfRows[index].para" :key="rindex">
+                        <td>{{ rindex + 1 }}</td>
+                        <td style="text-align: left;">
+                          {{ row.word }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+              </v-expansion-panels>
+              <v-divider></v-divider>
           </v-list-item>
         </v-list>
       </v-col>
@@ -123,7 +146,8 @@ export default {
         { text: 'Word', value: 'word'},
         { text: 'confidence', value: 'confidence'}
       ],
-      imageRows: []
+      imageRows: [],
+      pdfRows: []
     }
   },
   methods: {
@@ -159,12 +183,36 @@ export default {
             "text": text
           }
           this.respPdf.push(obj);
+          // split each page & paragraph
+          x.fullTextAnnotation.pages.forEach(page => {
+            let row = {
+              page: context.pageNumber,
+              para: []
+            };
+            page.blocks.forEach((block) => {
+              block.paragraphs.forEach(p => {
+                let paraRow = {};
+                let wordArr = [];
+                p.words.forEach(w => {
+                  // compose Symbols into one word
+                  wordArr.push(w.symbols.map(s => s.text).join(''));
+                })
+                paraRow.word = wordArr;
+                paraRow.confidence = p.confidence;
+                row.para.push(paraRow);
+              }); // Paragraphs
+            }); // block
+            // page
+            console.log('Paragraphs each page: ', row);
+            this.pdfRows.push(row);
+          });
         });
         this.dialog = false;
       }).catch(err => {  console.error(err); this.dialog = false;})
     },
     async handleUpload() {
       this.dialog = true;
+      this.response = [];
       this.respPdf = [];
       var formData = new FormData();
       var imagefile = this.$refs.file1
