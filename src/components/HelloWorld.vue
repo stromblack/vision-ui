@@ -52,6 +52,20 @@
             <v-card-text v-html="Description">
             </v-card-text>
           </v-card>
+          <v-table>
+            <thead>
+              <tr>
+                <th v-for="col in imageColumns" :key="col.value">{{ col.text }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row,index in imageRows" :key="index">
+                <td v-for="col in imageColumns" :key="col.value" style="text-align: left;">
+                  {{ row[col.value] }}
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
       </v-col>
       <v-col cols="12" v-if="respPdf.length > 0">
         <v-list>
@@ -102,7 +116,14 @@ export default {
       Description: '',
       previewImage: null,
       dialog: false,
-      previewFile: ''
+      previewFile: '',
+      imageColumns: [
+        // { text: 'Block (x,y)', value: 'blockValue'},
+        // { text: 'Paragraph (x,y)', value: 'paragraph'},
+        { text: 'Word', value: 'word'},
+        { text: 'confidence', value: 'confidence'}
+      ],
+      imageRows: []
     }
   },
   methods: {
@@ -153,11 +174,39 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(resp => {
-        console.log('--> resp', resp.data);
-        resp.data.forEach((element,index) => {
-          if (index == 0) this.Description = element.Description;
+        console.log('--> resp-img', resp.data);
+        let arr = [];
+        resp.data.DetectDocumentText.Pages.forEach(page => {
+          page.Blocks.forEach((block) => {
+            let box = block.BoundingBox.Vertices.map(v => {
+              return `${v.X}, ${v.Y}`
+            })
+            // console.log(`(Block ${block.BlockType} at ${box}`);
+            block.Paragraphs.forEach(p => {
+              let obj = { paragraph: null, word: null, confidence: null};
+              box = p.BoundingBox.Vertices.map(v => {
+                return `${v.X}, ${v.Y}`
+              })
+              // console.log(`Paragraph at ${box}`);
+              obj.paragraph = box;
+              let wordArr = [];
+              p.Words.forEach(w => {
+                // compose Symbols into one word
+                wordArr.push(w.Symbols.map(s => s.Text).join(''));
+              })
+              obj.word = wordArr;
+              obj.confidence = p.Confidence;
+              arr.push(obj);
+            }); // Paragraphs
+          }); // block
+          // console.log('-->', arr);
+          this.imageRows = arr;
         });
-        this.response = resp.data;
+        // resp.data.data1.forEach((element,index) => {
+        //   if (index == 0) this.Description = element.Description;
+        // });
+        this.Description = resp.data.DetectDocumentText.Text
+        this.response = resp.data.DetectText.slice(1);
         this.dialog = false;
       }).catch(err => {  console.error(err); this.dialog = false;})
     }
