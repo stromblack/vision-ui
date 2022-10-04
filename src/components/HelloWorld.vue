@@ -78,7 +78,7 @@
                   {{ item.text }}
                 </v-card-text>
               </v-card>
-              <v-expansion-panels>
+              <v-expansion-panels v-if="pdfRows.length > 0">
                 <v-expansion-panel elevation="5">
                 <v-expansion-panel-title>Paragraphs of page {{ item.context.pageNumber }}</v-expansion-panel-title>
                 <v-expansion-panel-text>
@@ -262,8 +262,8 @@ export default {
     },
     async handleUploadDocImage() {
       this.dialog = true;
-      this.response = [];
       this.respPdf = [];
+      this.dialog = true;
       var formData = new FormData();
       var imagefile = this.$refs.file1
       formData.append("image", imagefile.files[0]);
@@ -272,7 +272,14 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(resp => {
-        console.log('--> resp-doc-img', resp.data);
+        console.log('--> resp-doc-to-img', resp.data);
+        resp.data.responses.forEach((x, index) => {
+          let obj = {
+            "text": x.fullTextAnnotation.text,
+            "context": {...x.context, pageNumber: (index +1)}
+          }
+          this.respPdf.push(obj);
+        });
         this.dialog = false;
       }).catch(err => {  console.error(err); this.dialog = false;})
     }
