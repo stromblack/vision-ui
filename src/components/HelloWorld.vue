@@ -34,7 +34,9 @@
           <v-col>
             <v-btn @click="handleUpload">Upload Image</v-btn>
           </v-col>
-         
+         <v-col>
+          <v-btn @click="handleUploadDocImage" color="error">Upload Docs/Image</v-btn>
+         </v-col>
           <v-col>
             <v-btn @click="handleUploadDoc" color="info">Upload Docs</v-btn>
           </v-col>
@@ -255,6 +257,22 @@ export default {
         // });
         this.Description = resp.data.DetectDocumentText.Text
         this.response = resp.data.DetectText.slice(1);
+        this.dialog = false;
+      }).catch(err => {  console.error(err); this.dialog = false;})
+    },
+    async handleUploadDocImage() {
+      this.dialog = true;
+      this.response = [];
+      this.respPdf = [];
+      var formData = new FormData();
+      var imagefile = this.$refs.file1
+      formData.append("image", imagefile.files[0]);
+      await axios.post("https://localhost:44314/api/vision/batch/image", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(resp => {
+        console.log('--> resp-doc-img', resp.data);
         this.dialog = false;
       }).catch(err => {  console.error(err); this.dialog = false;})
     }
