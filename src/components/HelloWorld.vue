@@ -12,7 +12,7 @@
 
       <v-col class="mb-4" cols="12">
         <h1 class="display-2 font-weight-bold mb-3">
-          CV Read Image/Document To Text
+          Computer Vision Read Image/Document To Text
         </h1>
       </v-col>
       <v-col cols="12" align-self="center" v-if="previewFile != ''">
@@ -72,36 +72,36 @@
       <v-col cols="12" v-if="respPdf.length > 0">
         <v-list>
           <v-list-item v-for="item, index in respPdf" :key="index">
-              <v-list-item-title>Page {{ item.context }}</v-list-item-title>
-              <v-card>
+              <v-card variant="outlined" class="mx-auto">
+                <v-card-title>{{ item.context }}</v-card-title>
                 <v-card-text>
                   {{ item.text }}
                 </v-card-text>
+                <v-divider></v-divider>
+                <v-expansion-panels v-if="pdfRows.length > 0">
+                  <v-expansion-panel elevation="20">
+                  <v-expansion-panel-title>Paragraphs of page {{ item.context.pageNumber }}</v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <v-table>
+                      <thead>
+                        <tr>
+                          <th>Paragraphs</th>
+                          <th>Word</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="row,rindex in pdfRows[index].para" :key="rindex">
+                          <td>{{ rindex + 1 }}</td>
+                          <td style="text-align: left;">
+                            {{ row.word }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </v-table>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+                </v-expansion-panels>
               </v-card>
-              <v-expansion-panels v-if="pdfRows.length > 0">
-                <v-expansion-panel elevation="5">
-                <v-expansion-panel-title>Paragraphs of page {{ item.context.pageNumber }}</v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <v-table>
-                    <thead>
-                      <tr>
-                        <th>Paragraphs</th>
-                        <th>Word</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="row,rindex in pdfRows[index].para" :key="rindex">
-                        <td>{{ rindex + 1 }}</td>
-                        <td style="text-align: left;">
-                          {{ row.word }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </v-table>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              </v-expansion-panels>
-              <v-divider></v-divider>
           </v-list-item>
         </v-list>
       </v-col>
@@ -279,6 +279,29 @@ export default {
             "context": {...x.context, pageNumber: (index +1)}
           }
           this.respPdf.push(obj);
+          // split each page & paragraph
+          x.fullTextAnnotation.pages.forEach(page => {
+            let row = {
+              page:  (index + 1),
+              para: []
+            };
+            page.blocks.forEach((block) => {
+              block.paragraphs.forEach(p => {
+                let paraRow = {};
+                let wordArr = [];
+                p.words.forEach(w => {
+                  // compose Symbols into one word
+                  wordArr.push(w.symbols.map(s => s.text).join(''));
+                })
+                paraRow.word = wordArr.join(" ");
+                paraRow.confidence = p.confidence;
+                row.para.push(paraRow);
+              }); // Paragraphs
+            }); // block
+            // page
+            // console.log('Paragraphs each page: ', row);
+            this.pdfRows.push(row);
+          });
         });
         this.dialog = false;
       }).catch(err => {  console.error(err); this.dialog = false;})
