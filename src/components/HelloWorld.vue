@@ -83,7 +83,7 @@
                   <v-expansion-panel elevation="20">
                   <v-expansion-panel-title>Paragraphs of page {{ item.context.pageNumber }}</v-expansion-panel-title>
                   <v-expansion-panel-text>
-                    <v-table>
+                    <v-table density="comfortable">
                       <thead>
                         <tr>
                           <th>Paragraphs</th>
@@ -292,7 +292,8 @@ export default {
                 let wordArr = [];
                 p.words.forEach(w => {
                   // compose Symbols into one word
-                  wordArr.push(w.symbols.map(s => s.text).join(''));
+                  let symbols = w.symbols.map(s => s.text).join('');
+                  wordArr.push(symbols);
                 })
                 paraRow.word = wordArr.join(" ");
                 paraRow.confidence = p.confidence;
