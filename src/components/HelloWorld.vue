@@ -26,9 +26,10 @@
           <v-file-input ref="file1"   placeholder="Upload file"
           @click:clear="previewFile = ''"
           @change="handlePreviewFile"
-            prepend-icon="mdi-camera"
+            counter
+            show-size
             accept="image/*,.pdf, .tiff"
-            label="Image or Pdf file"></v-file-input>
+            label="Select .jpg, .jpeg, .png, .pdf, .tiff file"></v-file-input>
         </v-row>
         <v-row justify="center">
           <v-col>
